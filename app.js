@@ -18,6 +18,16 @@ loadEventListners();
 function loadEventListners() {
   // Add task event
   form.addEventListener('submit', addTask);
+
+  /*
+  Part Two of this 3 part project starts here, inside the
+  loadEventListeners funtion. We will be using Event Delegation
+  here, meaning we're going to put the event listner onto the 
+  Task List itself, onto the UL
+  */
+
+  // Remove task event - The actual function is created around line 92
+  taskListCollection.addEventListener('click', removeTask);
 }
 
 // Add task
@@ -76,4 +86,15 @@ function addTask(e) {
   // out. The mistake I made was forgetting to add the word Default to the
   // method below  /:[
   e.preventDefault();
+}
+
+// Remove Task Function, this function is created to specifically target the trash can icon and use it as the sole means of deleting a task. So in JS terms, we need to target that element and the function below is how I will achieve that goal. To start, I will need to create an if statement that targets the a tag inside the li element, but comes before the icon.
+function removeTask(e) {
+  if (e.target.parentElement.classList.contains('delete-item')) {
+    // Confirm to the user that task has been deleted by displaying a message that says that
+    if (confirm('Are you sure? This cannot be undone...')) {
+      // Target the i tag thats inside the a tag thats inside the li tag
+      e.target.parentElement.parentElement.remove();
+    }
+  }
 }
