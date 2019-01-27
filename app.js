@@ -6,8 +6,8 @@ const clearTheFilter = document.querySelector('#filter');
 const clearTasksBtn = document.querySelector('.clear-tasks');
 
 /*
-we're going to need a submit button on the task form, but instead of putting 
-it in the global scope, we're going to call a funtion to 
+We're going to need a submit button on the task form, but instead of putting 
+it in the global scope, we're going to call a funtion that will
 LOAD ALL EVENT LISTENERS
 */
 
@@ -16,18 +16,24 @@ loadEventListners();
 
 // creates the function
 function loadEventListners() {
-  // Add task event
+  // Add task event - The actual function is created around line 34
   form.addEventListener('submit', addTask);
 
   /*
   Part Two of this 3 part project starts here, inside the
   loadEventListeners funtion. We will be using Event Delegation
-  here, meaning we're going to put the event listner onto the 
+  here, meaning we're going to put the event listener onto the 
   Task List itself, onto the UL
   */
 
-  // Remove task event - The actual function is created around line 92
+  // Remove task event - This provides the option to click on the delete icon and delete one task at a time - The actual function is created around line 92
   taskListCollection.addEventListener('click', removeTask);
+
+  // Clear tasks event - This provides the option to clear all the tasks currently displayed in the Tasks List, all at once. - The actual function is created around line 104
+  clearTasksBtn.addEventListener('click', clearTasks);
+
+  // Filter tasks event - The actual function is created around line 104
+  clearTheFilter.addEventListener('keyup', filterTasks);
 }
 
 // Add task
@@ -97,4 +103,33 @@ function removeTask(e) {
       e.target.parentElement.parentElement.remove();
     }
   }
+}
+
+// Clear Tasks Function - Way 1 - with innerHTML
+// function clearTasks() {
+//   taskListCollection.innerHTML = '';
+// }
+
+// Clear Tasks Function *FASTER* - Way 2 - with looping thru and calling removeChild
+function clearTasks() {
+  while (taskListCollection.firstChild) {
+    taskListCollection.removeChild(taskListCollection.firstChild);
+  }
+}
+
+// Filter Tasks Function
+function filterTasks(e) {
+  // get the typed input by creating a variable
+  // toLowerCase added at the end in order to keep consistency while matching
+  const text = e.target.value.toLowerCase();
+
+  // get all of the list items so that when user filters they have access to everything which makes it possible to filter effectively... we can use querySelectorAll in this case because it returns a node list as to where if we used getElementsByClass, it would return a class, which we'd then have to create an array for the class and loop through that newly created array. But since querySelectorAll returns a comlete node list, its simpler and faster to do it this way and use the forEach loop on it.
+  document.querySelectorAll('.collection-item').forEach(function(task) {
+    const item = task.firstChild.textContent;
+    if (item.toLowerCase().indexOf(text) != -1) {
+      task.style.display = 'block';
+    } else {
+      task.style.display = 'none';
+    }
+  });
 }
