@@ -14,8 +14,11 @@ LOAD ALL EVENT LISTENERS
 // calls the function
 loadEventListners();
 
-// creates the function
+// LOADEVENTLISTENERS FUNCTION STARTS HERE
 function loadEventListners() {
+  // DOM Load event - FUNCTION GETTASKS at close of loadEventListners
+  document.addEventListener('DOMContentLoaded', getTasks);
+
   // Add task event - The actual function is created around line 34
   form.addEventListener('submit', addTask);
 
@@ -36,7 +39,36 @@ function loadEventListners() {
   clearTheFilter.addEventListener('keyup', filterTasks);
 }
 
-// Add task
+// GETTASKS FUNCTION STARTS HERE - Get tasks from local storage
+function getTasks() {
+  let tasks;
+  if (localStorage.getItem('tasks') === null) {
+    tasks = [];
+  } else {
+    tasks = JSON.parse(localStorage.getItem('tasks'));
+  }
+
+  tasks.forEach(function(task) {
+    // Create li element
+    const li = document.createElement('li');
+    // Add class
+    li.className = 'collection-item';
+    // Create text node and append to li
+    li.appendChild(document.createTextNode(task));
+    // Create new link element
+    const link = document.createElement('a');
+    // Add class
+    link.className = 'delete-item secondary-content';
+    // Add icon html
+    link.innerHTML = '<i class="far fa-trash-alt"></i>';
+    // Append the link to the li
+    li.appendChild(link);
+    // Append the li to the ul
+    taskListCollection.appendChild(li);
+  });
+}
+
+// ADD TASK FUNCTION STARTS HERE
 function addTask(e) {
   // REMIND user to add a task
   if (newTaskInputField.value === '') {
@@ -84,6 +116,12 @@ function addTask(e) {
   // Append the li to the ul
   taskListCollection.appendChild(li);
 
+  /*
+  // STORAGE IN LOCAL STORAGE
+  Part Three of this 3-part project starts here. This is the part where I incorporate local storage.
+  */
+  storeTasksInLocalStorage(newTaskInputField.value);
+
   // Clear the input after the button has been clicked
   newTaskInputField.value = '';
 
@@ -94,17 +132,50 @@ function addTask(e) {
   e.preventDefault();
 }
 
-// Remove Task Function, this function is created to specifically target the trash can icon and use it as the sole means of deleting a task. So in JS terms, we need to target that element and the function below is how I will achieve that goal. To start, I will need to create an if statement that targets the a tag inside the li element, but comes before the icon.
+// STORE TASKS FUNCTION STARTS HERE
+function storeTasksInLocalStorage(task) {
+  let tasks;
+  if (localStorage.getItem('tasks') === null) {
+    tasks = [];
+  } else {
+    tasks = JSON.parse(localStorage.getItem('tasks'));
+  }
+  tasks.push(task);
+  localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+// REMOVE TASK FUNCTION STARTS HERE, this function is created to specifically target the trash can icon and use it as the sole means of deleting a task. So in JS terms, we need to target that element and the function below is how I will achieve that goal. To start, I will need to create an if statement that targets the a tag inside the li element, but comes before the icon.
 function removeTask(e) {
   if (e.target.parentElement.classList.contains('delete-item')) {
     // Confirm to the user that task has been deleted by displaying a message that says that
     if (confirm('Are you sure? This cannot be undone...')) {
       // Target the i tag thats inside the a tag thats inside the li tag
       e.target.parentElement.parentElement.remove();
+
+      // REMOVE FROM LOCAL STORAGE
+      removeTaskFromLocalStorage(e.target.parentElement.parentElement);
     }
   }
 }
 
+// REMOVE FROM LOCAL STORAGE FUNCTION STARTS HERE
+function removeTaskFromLocalStorage(taskItem) {
+  let tasks;
+  if (localStorage.getItem('tasks') === null) {
+    tasks = [];
+  } else {
+    tasks = JSON.parse(localStorage.getItem('tasks'));
+  }
+
+  tasks.forEach(function(task, index) {
+    if (taskItem.textContent === task) {
+      tasks.splice(index, 1);
+    }
+  });
+  localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+// CLEAR TASKS FUNCTION STARTS HERE
 // Clear Tasks Function - Way 1 - with innerHTML
 // function clearTasks() {
 //   taskListCollection.innerHTML = '';
@@ -115,9 +186,17 @@ function clearTasks() {
   while (taskListCollection.firstChild) {
     taskListCollection.removeChild(taskListCollection.firstChild);
   }
+
+  // CLEAR TASKS FROM LOCAL STORAGE CALL STARTS HERE
+  clearTasksFromLocalStorage();
 }
 
-// Filter Tasks Function
+// CLEAR TASKS FROM LOCAL STORAGE FUNCTION STARTS HERE
+function clearTasksFromLocalStorage() {
+  localStorage.clear();
+}
+
+// FILTER TASKS FUNCTION STARTS HERE
 function filterTasks(e) {
   // get the typed input by creating a variable
   // toLowerCase added at the end in order to keep consistency while matching
